@@ -408,4 +408,26 @@ class FormSelectTest extends CommonTestCase
         $this->setExpectedException('Zend\Form\Exception\DomainException');
         $this->helper->render($element);
     }
+
+    public function testHelperUsesStrictCheckToDetermineWhichOptionsAreSelected()
+    {
+        $select = new SelectElement('language');
+        $select->setLabel('Which is your mother tongue?');
+        $select->setAttribute('multiple', true);
+        $select->setValueOptions([
+            '1.1' => 'French',
+            '1.2' => 'English',
+            '1.10' => 'Japanese',
+            '1.20' => 'Chinese',
+        ]);
+        $select->setValue(['1.1']);
+        $this->assertEquals(['1.1'], $select->getValue());
+
+        $markup  = $this->helper->render($select);
+
+        $this->assertRegExp('{value="1.1" selected="selected"}i', $markup);
+        $this->assertNotRegExp('{value="1.2" selected="selected"}i', $markup);
+        $this->assertNotRegExp('{value="1.10" selected="selected"}i', $markup);
+        $this->assertNotRegExp('{value="1.20" selected="selected"}i', $markup);
+    }
 }
